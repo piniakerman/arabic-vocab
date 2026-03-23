@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#064e3b">
+    <title>אתגר הערבית - Ultimate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(6, 78, 59, 0.4); 
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            background-color: #022c22;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .bg-particles {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #064e3b 0%, #022c22 100%);
+            overflow: hidden;
+        }
+        
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(45deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.15));
+            animation: float 20s infinite linear;
+            filter: blur(30px);
+        }
+
+        .circle:nth-child(1) { width: 300px; height: 300px; top: -10%; left: -10%; animation-duration: 25s; }
+        .circle:nth-child(2) { width: 400px; height: 400px; bottom: -20%; right: -10%; animation-duration: 30s; animation-direction: reverse; }
+        .circle:nth-child(3) { width: 250px; height: 250px; top: 40%; left: 60%; animation-duration: 22s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -50px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+
+        .arabic-font { font-family: 'Amiri', serif; }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+            transform: skewX(-20deg);
+            animation: shine 8s infinite;
+        }
+
+        @keyframes shine { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
+
+        .pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn { 0% { transform: scale(0.8) translateY(20px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+
+        .shake { animation: shake 0.4s ease-in-out; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+
+        .success-glow { animation: successGlow 1.5s ease-out; }
+        @keyframes successGlow {
+            0% { box-shadow: var(--glass-shadow); border-color: var(--glass-border); }
+            15% { box-shadow: 0 0 40px 10px rgba(52, 211, 153, 0.4); border-color: rgba(52, 211, 153, 0.8); transform: scale(1.02); }
+            100% { box-shadow: var(--glass-shadow); border-color: var(--glass-border); transform: scale(1); }
+        }
+
+        .medal-pop { animation: medalPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes medalPop { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 50% { transform: scale(1.2) rotate(10deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+
+        .medal-locked { filter: grayscale(100%) brightness(0.4); transform: scale(0.9); }
+        .medal-unlocked { filter: none; transform: scale(1.1); text-shadow: 0 0 20px rgba(255,255,255,0.4); }
+
+        input::placeholder { color: rgba(255, 255, 255, 0.4); }
+        input[type="text"] { font-size: 18px !important; }
+        @media (min-width: 640px) { input[type="text"] { font-size: 1.5rem !important; } }
+        
+        .progress-container { width: 100%; height: 6px; background: rgba(0,0,0,0.3); border-radius: 10px; overflow: hidden; margin-top: 8px; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 10px; transition: width 0.5s ease-out; }
+    </style>
+</head>
+<body class="p-3 sm:p-6 md:p-8">
+
+    <div class="bg-particles">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <audio id="bg-music" loop crossorigin="anonymous" preload="auto">
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="medal-sound" crossorigin="anonymous" preload="auto">
+        <source src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- מסך פתיחה -->
+    <div id="start-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-md text-center p-6 transition-opacity duration-500">
+        <div class="glass-panel p-8 sm:p-12 max-w-lg w-full transform transition-all">
+            <h1 class="text-5xl sm:text-6xl font-black mb-2 arabic-font tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 drop-shadow-lg leading-tight">العربية</h1>
+            <p class="text-lg sm:text-xl mb-8 text-emerald-100">האקדמיה הווירטואלית לערבית</p>
+            
+            <div id="user-input-container" class="mb-4 w-full transition-all duration-300">
+                <input type="text" id="username-input" placeholder="הכנס את שמך..." autocomplete="off"
+                       class="w-full bg-slate-900/50 border border-emerald-900/50 text-white rounded-xl block p-4 text-center transition-all outline-none focus:border-emerald-400 focus:bg-slate-800/80 shadow-inner mb-4">
+            </div>
+
+            <div id="welcome-back-container" class="hidden mb-6 w-full transition-all duration-300">
+                <p class="text-2xl sm:text-3xl text-emerald-300 font-bold mb-2">שלום שוב, <span id="welcome-name"></span>!</p>
+                <button id="change-user-btn" class="text-sm text-emerald-400/60 underline hover:text-white transition-colors">החלף משתמש</button>
+            </div>
+
+            <div class="space-y-4 mb-8">
+                <div>
+                    <p class="text-emerald-200/70 text-sm mb-2 font-semibold">סגנון משחק:</p>
+                    <div class="flex justify-center gap-2 bg-slate-900/50 p-1 rounded-xl border border-emerald-900/50">
+                        <button id="mode-typing-btn" class="flex-1 py-2 rounded-lg text-white font-bold bg-emerald-800 shadow-md transition-all text-sm">הקלדה ⌨️</button>
+                        <button id="mode-choice-btn" class="flex-1 py-2 rounded-lg text-emerald-200/50 hover:text-white transition-all text-sm">אמריקאי 🖱️</button>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-emerald-200/70 text-sm mb-2 font-semibold">כיוון תרגום:</p>
+                    <div class="flex justify-center gap-2 bg-slate-900/50 p-1 rounded-xl border border-emerald-900/50">
+                        <button id="dir-ar-he-btn" class="flex-1 py-2 rounded-lg text-white font-bold bg-emerald-800 shadow-md transition-all text-sm">ערבית לעברית 🇸🇦</button>
+                        <button id="dir-he-ar-btn" class="flex-1 py-2 rounded-lg text-emerald-200/50 hover:text-white transition-all text-sm">עברית לערבית 🇮🇱</button>
+                    </div>
+                </div>
+            </div>
+
+            <button id="start-btn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 px-8 py-4 rounded-xl text-xl font-black text-white shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all active:scale-95">
+                התחל ללמוד 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- חלון פרופיל -->
+    <div id="profile-modal" class="hidden fixed inset-0 z-[60] bg-slate-950/80 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="glass-panel p-6 sm:p-10 max-w-lg w-full text-center relative transform scale-95 transition-transform duration-300" id="profile-content">
+            <button id="close-profile-btn" class="absolute top-4 right-5 text-emerald-400 hover:text-white text-2xl transition-colors">✖</button>
+            
+            <div class="w-20 h-20 mx-auto bg-gradient-to-br from-emerald-400 to-teal-600 rounded-full flex items-center justify-center text-4xl mb-4 shadow-lg shadow-emerald-500/20">👤</div>
+            <h2 class="text-3xl font-black mb-1 text-white">הפרופיל של <span id="profile-name-display" class="text-emerald-300"></span></h2>
+            
+            <div class="bg-slate-900/50 rounded-2xl p-4 my-6 border border-emerald-900/50">
+                <p class="text-sm text-emerald-200/70 mb-1">סך הכל נקודות</p>
+                <p id="profile-score-display" class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400">0</p>
+                
+                <div class="mt-4 text-right">
+                    <p class="text-xs text-emerald-200/70 mb-1 flex justify-between">
+                        <span>התקדמות למדליה הבאה:</span>
+                        <span id="next-medal-hint" class="font-bold text-emerald-300"></span>
+                    </p>
+                    <div class="progress-container h-2 bg-slate-800">
+                        <div id="profile-progress-bar" class="progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 class="text-lg text-emerald-100 mb-4 font-semibold text-right">ארון המדליות היוקרתי</h3>
+            <div class="flex flex-wrap justify-center gap-3 sm:gap-4 bg-slate-900/30 rounded-2xl p-5 border border-emerald-900/50">
+                <div class="flex flex-col items-center transition-all duration-500 medal-locked w-16" id="medal-box-bronze">
+                    <span class="text-4xl drop-shadow-md">🥉</span><span class="text-[10px] text-yellow-600 font-bold mt-2">100</span>
+                </div>
+                <div class="flex flex-col items-center transition-all duration-500 medal-locked w-16" id="medal-box-silver">
+                    <span class="text-4xl drop-shadow-md">🥈</span><span class="text-[10px] text-gray-400 font-bold mt-2">500</span>
+                </div>
+                <div class="flex flex-col items-center transition-all duration-500 medal-locked w-16" id="medal-box-gold">
+                    <span class="text-4xl drop-shadow-md">🥇</span><span class="text-[10px] text-yellow-400 font-bold mt-2">1,000</span>
+                </div>
+                <div class="flex flex-col items-center transition-all duration-500 medal-locked w-16" id="medal-box-amber">
+                    <span class="text-4xl drop-shadow-md">🔶</span><span class="text-[10px] text-orange-400 font-bold mt-2">5,000</span>
+                </div>
+                <div class="flex flex-col items-center transition-all duration-500 medal-locked w-16" id="medal-box-diamond">
+                    <span class="text-4xl drop-shadow-md">💎</span><span class="text-[10px] text-cyan-300 font-bold mt-2">10,000</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ניווט עליון -->
+    <div class="w-full max-w-3xl mx-auto flex justify-between items-center mb-6 mt-2 relative z-40">
+        <div class="flex gap-2">
+            <button id="music-toggle" class="glass-panel w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors text-lg">🔈</button>
+            <button id="open-profile-btn" class="glass-panel px-3 sm:px-4 py-2 rounded-xl hover:bg-white/10 transition-colors flex items-center justify-center font-semibold text-sm sm:text-base gap-2">
+                👤 <span class="hidden sm:inline">פרופיל</span>
+            </button>
+            <button id="settings-toggle-btn" class="glass-panel px-3 sm:px-4 py-2 rounded-xl hover:bg-white/10 transition-colors flex items-center justify-center font-semibold text-sm sm:text-base gap-2" title="הגדרות משחק">
+                ⚙️ <span class="hidden md:inline" id="current-settings-label">AR ➔ HE | הקלדה</span>
+            </button>
+        </div>
+
+        <div class="glass-panel px-5 py-2 rounded-xl flex flex-col items-end min-w-[120px]">
+            <div class="flex items-center gap-2">
+                <span class="text-emerald-200 text-sm font-medium">ניקוד</span>
+                <span id="score-display" class="text-2xl font-black text-yellow-400 leading-none">0</span>
+            </div>
+            <div id="medal-container" class="hidden absolute -left-4 -top-4">
+                <span id="medal-display" class="text-3xl drop-shadow-xl" style="text-shadow: 0 0 15px rgba(255,255,255,0.6);"></span>
+            </div>
+            <div class="progress-container h-1.5 mt-1 opacity-50">
+                <div id="mini-progress-bar" class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- זירת המשחק -->
+    <div id="game-container" class="glass-panel w-full max-w-3xl mx-auto p-6 sm:p-10 md:p-12 text-center opacity-0 transition-opacity duration-700 pointer-events-none transform scale-95 flex-grow flex flex-col justify-center mb-auto border-t border-white/20">
+        
+        <div id="question-label" class="mb-4 text-emerald-300 text-sm sm:text-base tracking-widest font-semibold uppercase">תרגם לעברית</div>
+        
+        <div class="flex items-center justify-center gap-4 mb-8 sm:mb-12 min-h-[100px] flex-wrap" dir="rtl">
+            <div id="word-display" class="arabic-font text-5xl sm:text-6xl md:text-7xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] break-words">
+            </div>
+            <button id="speak-btn" class="bg-slate-800/50 hover:bg-slate-700/80 border border-emerald-900/50 p-3 rounded-full transition-all active:scale-90 flex items-center justify-center text-xl shadow-lg" title="השמע מילה">
+                🔊
+            </button>
+        </div>
+
+        <!-- אזור הקלדה -->
+        <div id="typing-input-wrapper" class="relative mb-8 w-full max-w-xl mx-auto">
+            <input type="text" id="answer-input" placeholder="הקלד תרגום..." autocomplete="off" dir="rtl"
+                   class="w-full bg-slate-900/60 border-2 border-emerald-900/50 focus:border-emerald-400 text-white rounded-2xl block p-4 sm:p-5 text-center transition-all outline-none shadow-inner font-bold">
+        </div>
+
+        <!-- אזור בחירה (אמריקאי) -->
+        <div id="choice-grid-container" class="hidden w-full mb-8 max-w-2xl mx-auto">
+            <div id="choice-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 w-full max-w-2xl mx-auto">
+            <button id="submit-btn" class="w-full sm:flex-[2] bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black py-4 px-6 rounded-2xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)] active:scale-95 text-lg">
+                בדיקה
+            </button>
+            <div class="flex gap-3 w-full sm:flex-[2]">
+                <button id="reveal-btn" class="flex-1 bg-slate-800/80 hover:bg-slate-700 border border-emerald-900/50 text-white font-semibold py-4 rounded-2xl transition-all active:scale-95 text-base shadow-md">
+                    רמז 💡
+                </button>
+                <button id="skip-btn" class="flex-1 bg-slate-800/50 hover:bg-slate-700 border border-emerald-900/30 text-emerald-200/70 hover:text-white font-semibold py-4 rounded-2xl transition-all active:scale-95 text-base">
+                    הבא ⏭️
+                </button>
+            </div>
+        </div>
+
+        <div id="feedback-msg" class="mt-8 text-lg sm:text-xl font-bold h-12 transition-all duration-300 opacity-0 transform translate-y-4 flex items-center justify-center break-words px-2">
+        </div>
+    </div>
+
+    <!-- סקריפט ראשי ומאגר -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // מאגר מילים מקיף (קובץ המכינה) - ללא צורת רבים
+        const wordsDB = {
+            // שמות עצם
+            "دستور": ["חוקה"], "أزمة": ["משבר"], "محكمة": ["בית משפט"], "دليل": ["ראיה", "הוכחה"],
+            "أمن": ["ביטחון"], "استقالة": ["התפטרות"], "حكومة": ["ממשלה"], "مواطن": ["אזרח"],
+            "حادث": ["אירוע", "תאונה"], "قوة": ["כוח", "כוחות"], "قيادة": ["הנהגה"], "ميثاق": ["אמנה", "ברית"],
+            "اتفاق": ["הסכם"], "معضلة": ["דילמה", "בעיה סבוכה"], "نزاع": ["עימות", "סכסוך"], "تنسيق": ["תיאום"],
+            "هيئة": ["רשות", "גוף", "סמכות"], "برهان": ["ראיה חותכת"], "واقعة": ["תקרית"], "تنحي": ["פרישה", "התפטרות"],
+            "ملف": ["תיק", "נושא"], "تطور": ["התפתחות"], "تشكيل": ["מערך", "עוצבה"], "إنجاز": ["הישג", "ביצוע מוצלח"],
+            "آلية": ["מנגנון", "פרוצדורה"], "حوار": ["שיח", "דיאלוג"], "فجوة": ["פער"], "مخرج": ["מוצא", "פתרון"],
+            "عنصر": ["גורם", "אלמנט"], "صدام": ["התנגשות"], "ظاهرة": ["תופעה"], "تحدي": ["אתגר"],
+            "تأثير": ["השפעה"], "نظام": ["מערכת", "משטר"], "اقتصاد": ["כלכלה"], "شبكة": ["רשת"],
+            "توتر": ["מתיחות", "מתח"], "إجراء": ["אמצעי", "צעד"], "مستوى": ["רמה", "מישור"], "بيئة": ["סביבה"],
+            "مسؤولية": ["אחריות"], "استثمار": ["השקעה"], "دور": ["תפקיד"], "حقيقة": ["אמת", "עובדה"],
+            "تقرير": ["דוח"], "مفهوم": ["מושג"], "مجتمع": ["חברה"], "قرار": ["החלטה"], "تعاون": ["שיתוף פעולה"],
+            "حرب": ["מלחמה"], "شأن": ["עניין", "סוגיה"], "خطة": ["תוכנית"], "مجرم": ["פושע"], "شرطة": ["משטרה"],
+            "مسؤول": ["אחראי", "בכיר"], "سلطة": ["רשות", "סמכות"], "مفاوضة": ["משא ומתן"], "مدير": ["מנהל"],
+            "جيل": ["דור"], "إخلاص": ["נאמנות", "מסירות"], "هدف": ["יעד", "מטרה"], "بحث": ["מחקר", "חיפוש"],
+            "ملمح": ["תו פנים", "מאפיין"], "تكلفة": ["עלות"], "مفكر": ["הוגה דעות"], "جدوى": ["תועלת", "כדאיות"],
+            "صراع": ["סכסוך", "מאבק"], "منصب": ["תפקיד", "משרה"], "مطلب": ["דרישה"], "مبادرة": ["יוזמה"],
+            "إعلام": ["תקשורת"], "صحيفة": ["עיתון"], "مراسل": ["כתב", "שליח"], "كاتب": ["סופר", "כותב", "פקיד"],
+            "مكتب": ["משרד"], "أب": ["אב"], "ابن": ["בן"], "بيت": ["בית"], "ملك": ["מלך"], "بنت": ["בת", "ילדה"],
+            "بيان": ["הצהרה", "גילוי דעת"], "بلد": ["ארץ", "עיר", "יישוב"], "أمين": ["מזכיר", "נאמן"], "سفير": ["שגריר"],
+            "مركز": ["מרכז"], "محادثة": ["שיחה"], "طريق": ["דרך"], "شهر": ["חודש"], "جندي": ["חייל"],
+            "خطاب": ["נאום"], "مطار": ["שדה תעופה"], "حزب": ["מפלגה"], "باب": ["דלת"], "كتاب": ["ספר"],
+            "يوم": ["יום"], "وزير": ["שר"], "دفاع": ["הגנה"], "ضابط": ["קצין"], "نقل": ["תעבורה", "העברה", "הובלה"],
+            "شارع": ["רחוב"], "طالب": ["תלמיד", "סטודנט"], "راكب": ["נוסע", "רוכב"], "نبأ": ["ידיעה"],
+            "ناطق": ["דובר"], "اسم": ["שם"], "ضيف": ["אורח"], "سيد": ["אדון", "מר"], "ليل": ["ליל", "לילה"],
+            "زعيم": ["מנהיג"], "صف": ["כיתה", "שורה"], "تلميذ": ["תלמיד"], "معلم": ["מורה"], "دفتر": ["מחברת"],
+            "سوق": ["שוק"], "خليج": ["מפרץ"], "زيارة": ["ביקור"], "رسالة": ["מכתב"], "جمعية": ["אגודה"],
+            "عاصمة": ["עיר בירה"], "صداقة": ["ידידות"], "صناعة": ["תעשייה"], "كلمة": ["מילה"], "لجنة": ["ועדה"],
+            "مدرسة": ["בית ספר"], "لغة": ["שפה"], "دولة": ["מדינה"], "ليلة": ["לילה"], "جملة": ["משפט"],
+            "ولد": ["ילד"], "كلام": ["דיבור", "דברים"], "برقية": ["מברק"], "جلسة": ["ישיבה"], "سياسة": ["מדיניות", "פוליטיקה"],
+            "مجلس": ["מועצה"], "رئيس": ["נשיא", "ראש"], "طائرة": ["מטוס"], "وفد": ["משלחת"], "مؤتمر": ["ועידה", "כנס"],
+            "دائرة": ["מחלקה", "חוג"], "مدة": ["פרק זמן", "תקופה"], "ضوء": ["אור"], "سؤال": ["שאלה"], "نائب": ["סגן"],
+            "عمل": ["עבודה"], "أم": ["אם", "אמא"], "جواب": ["תשובה"], "أرض": ["אדמה", "ארץ"], "مكتوب": ["מכתב"],
+            "آخر": ["אחר", "נוסף"], "أذن": ["אוזן"], "فرع": ["ענף", "סניף"], "منظمة": ["ארגון"], "تحرير": ["שחרור"],
+            "وكالة": ["סוכנות"], "عضو": ["איבר", "חבר"], "مهرجان": ["פסטיבל"], "قاعة": ["אולם"], "مصدر": ["מקור"],
+            "مدينة": ["עיר"], "وزارة": ["משרד ממשלתי"], "ثقافة": ["תרבות"], "وضع": ["מצב"], "مقال": ["מאמר"],
+            "حركة": ["תנועה"], "ممثل": ["נציג", "שחקן"], "أمة": ["אומה"], "علاقة": ["קשר", "יחס"], "إرهاب": ["טרור"],
+            "مساء": ["ערב"], "سنة": ["שנה"], "مظاهرة": ["הפגנה"], "انتخاب": ["בחירה", "בחירות"], "مبعوث": ["שליח"],
+            "مستشار": ["יועץ"], "مراقب": ["משקיף"], "متمرد": ["מורד"], "مساعد": ["עוזר"], "فلاح": ["איכר"],
+            "مندوب": ["נציג"], "ملاح": ["מלח"], "عدوان": ["תוקפנות"], "ساعة": ["שעה"], "سكرتير": ["מזכיר"],
+            "شكر": ["תודה"], "أمل": ["תקווה"], "فرد": ["אדם יחיד", "פרט"], "طرف": ["צד"], "سجين": ["אסיר"],
+            "اسبوع": ["שבוע"],
+            
+            // שמות תואר
+            "رسمي": ["רשמי"], "سابق": ["קודם", "לשעבר"], "أجنبي": ["זר"], "شامل": ["מקיף", "כולל"],
+            "مباشر": ["ישיר"], "حالي": ["נוכחי"], "ملح": ["דחוף", "בוער"], "مستدام": ["בר־קיימא", "בר קיימא"],
+            "محلي": ["מקומי"], "متوقع": ["צפוי"], "سلبي": ["שלילי"], "إيجابي": ["חיובי"], "متزايد": ["הולך וגובר"],
+            "معقد": ["מורכב"], "فعال": ["פעיל", "אפקטיבי"], "ضروري": ["נחוץ", "הכרחי"], "خطير": ["מסוכן"],
+            "ناجح": ["מוצלח"], "جديد": ["חדש"], "ثقافي": ["תרבותי"], "عميق": ["עמוק"], "ملحوظ": ["בולט", "ניכר"],
+            "موضوعي": ["אובייקטיבי"], "تاريخي": ["היסטורי"], "حقيقي": ["אמיתי"], "نبيل": ["נאצל"], "كبير": ["גדול"],
+            "فقير": ["עני"], "طويل": ["ארוך", "גבוה"], "صغير": ["קטן"], "غني": ["עשיר"], "عربي": ["ערבי"],
+            "دولي": ["בינלאומי"], "راهن": ["נוכחי", "עכשווי"], "عام": ["כללי", "ציבורי"], "عسكري": ["צבאי"],
+            "خاص": ["מיוחד", "פרטי"], "يهودي": ["יהודי"], "قليل": ["מעט", "מועט"], "مقبل": ["הבא"], "كثير": ["רב", "הרבה"],
+
+            // פעלים
+            "رفض": ["סירב"], "شارك": ["השתתף"], "اكتشف": ["גילה"], "استخدم": ["השתמש"], "عد": ["ספר", "החשיב"],
+            "تم": ["הושלם", "התבצע"], "أقر": ["אישר"], "اضطر": ["נאלץ"], "وضع": ["שם", "הניח"], "وافق": ["הסכים"],
+            "أوضح": ["הבהיר"], "توقع": ["ציפה"], "صار": ["הפך ל־", "הפך ל"], "زاد": ["גדל", "הוסיף"], "أشار": ["הצביע על"],
+            "استطاع": ["יכול היה"], "رأى": ["ראה", "סבר"], "بدا": ["נראה ש־", "נראה ש"], "أعطى": ["נתן"],
+            "أدى": ["גרם ל־", "גרם ל"], "تبنى": ["אימץ"], "أنجز": ["השלים", "ביצע"], "تنحى": ["פרש"], "تصادم": ["התנגש"],
+            "تبادل": ["החליף"], "تطور": ["התפתח"], "آزر": ["תמך"], "شهد": ["חווה", "היה עד ל־", "היה עד ל"],
+            "اعتبر": ["החשיב"], "ساهم": ["תרם ל־", "תרם ל"], "تجاوز": ["התגבר על"], "أثر": ["השפיע"],
+            "عانى": ["סבל מ", "סבל מי"], "استغل": ["ניצל"], "واجه": ["התמודד עם"], "ينبغي": ["צריך", "ראוי"],
+            "انعكس": ["השתקף"], "بات": ["נעשה", "הפך"], "أدرك": ["הבין", "קלט"], "اختلف": ["היה שונה מ", "היה שונה מי"],
+            "تجاهل": ["התעלם"], "دعا": ["קרא ל־", "קרא ל"], "استجاب": ["נענה ל־", "נענה ל"], "تراجع": ["נסוג", "ירד"],
+            "أضاف": ["הוסיף"], "قاد": ["הוביל"], "مر": ["עבר"], "استمر": ["נמשך"], "نفذ": ["ביצע"],
+            "قدم": ["הגיש", "הציג", "בא", "הגיע"], "تغير": ["השתנה"], "بنى": ["בנה"], "أنقذ": ["הציל"],
+            "لعب": ["שיחק", "מילא תפקיד"], "كتب": ["כתב"], "بدأ": ["התחיל"], "ذكر": ["הזכיר", "ציין"], "ذهب": ["הלך"],
+            "زار": ["ביקר"], "شرب": ["שתה"], "خرج": ["יצא"], "دخل": ["נכנס"], "طلب": ["ביקש"], "قرأ": ["קרא"],
+            "فتح": ["פתח"], "قال": ["אמר"], "ألقى": ["נשא", "השליך"], "وصل": ["הגיע"], "قام بـ": ["ערך", "ביצע"],
+            "رجع": ["חזר"], "سمع": ["שמע"], "صدر": ["יצא לאור"], "نشر": ["פרסם"], "فهم": ["הבין"], "جلس": ["ישב"],
+            "بعث": ["שלח"], "حمل": ["נשא"], "عقد": ["ערך", "קיים"], "علم": ["ידע"], "عمل": ["עבד"],
+            "وقع": ["נפל", "אירע", "חתם"], "سكن": ["גר"], "نزل": ["ירד"], "حضر": ["נכח", "בא"], "سكت": ["שתק"],
+            "دار": ["נסב", "סבב"], "صرح": ["הצהיר"], "مول": ["מימן"], "سلح": ["חימש"], "درب": ["אימן"],
+            "وثق": ["תיעד"], "وجه": ["הפנה"], "حسن": ["שיפר"], "مثل": ["ייצג"], "قرر": ["החליט"], "جرى": ["חל", "אירע"],
+            "رافق": ["ליווה"], "دافع عن": ["הגן על"], "واصل": ["המשיך"], "غادر": ["עזב"], "قابل": ["פגש"],
+            "ناقش": ["דן", "התווכח"], "أسكن": ["שיכן"], "أفرج عن": ["שחרר"], "أضرب": ["שבת"], "أغلق": ["נעל", "סגר"],
+            "أصدر": ["פרסם", "הוציא"], "أوفد": ["שלח"], "أعلن": ["הודיע"], "أعرب عن": ["הביע"], "تسلم": ["קיבל"],
+            "تدخل": ["התערב"], "تقدم": ["התקדם"], "تمرد": ["התמרד"], "تقرر": ["הוחלט"], "تناول": ["נגע בי", "נגע ב", "אכל"],
+            "تظاهر": ["הפגין"], "رد": ["השיב", "החזיר"], "شد": ["משך", "הידק"], "مد": ["הושיט", "האריך"],
+            "حل": ["פתר", "הגיע"], "فر": ["ברח"], "ظل": ["נשאר", "הוסיף להיות"], "وجد": ["מצא"], "وعد": ["הבטיח"],
+            "وقف": ["עמד", "נעצר"], "وصف": ["תיאר"], "ورد": ["הגיע", "הופיע"], "يبس": ["התייבש"], "باع": ["מכר"],
+            "نام": ["ישן"], "خاف": ["פחד"], "عاد": ["חזר"], "طار": ["עף"], "سار": ["הלך", "נע"], "رمى": ["זרק"],
+            "مشى": ["הלך"], "قضى": ["פסק", "בילה"], "نسي": ["שכח"], "بكى": ["בכה"], "هدى": ["הדריך"],
+
+            // ביטויים, מילות יחס וכינויים
+            "ضد": ["נגד"], "نتيجة لـ": ["כתוצאה מ־", "כתוצאה מ"], "حول": ["סביב", "בנוגע ל־", "בנוגע ל"],
+            "طالما": ["כל עוד"], "بدلا من": ["במקום"], "بناء على": ["על סמך"], "بما في ذلك": ["לרבות", "כולל"],
+            "من ناحية": ["מבחינה"], "إذا": ["אם"], "لسوء الحظ": ["למרבה הצער"], "حتى": ["כדי שי", "כדי ש", "עד שי", "עד ש"],
+            "أما ... ف": ["באשר להרי ש", "באשר ל"], "رغم": ["למרות"], "تماما": ["לחלוטין"], "أنا": ["אני"],
+            "أنت": ["אתה", "את"], "هو": ["הוא"], "هي": ["היא"], "نحن": ["אנחנו"], "أنتم": ["אתם"], "أنتن": ["אתן"],
+            "هم": ["הם"], "هن": ["הן"], "أنتما": ["שניכם", "שתיכן"], "هما": ["שניהם", "שתיהן"], "هذا": ["זה"],
+            "هذه": ["זאת"], "هؤلاء": ["אלה"], "ذلك": ["ההוא"], "تلك": ["ההיא"], "أولئك": ["ההם"], "ما": ["לא", "מה"],
+            "لا": ["לא"], "غير": ["בלתי", "לא־", "לא"], "متى": ["מתי"], "أين": ["איפה"], "من": ["מי", "מן"],
+            "ماذا": ["מה"], "كيف": ["איך"], "كم": ["כמה"], "لماذا": ["למה"], "أي": ["איזה"], "إلى": ["אל", "ל"],
+            "بين": ["בין"], "في": ["בי", "בתוך", "ב"], "لـ": ["ל-", "ל"], "مع": ["עם"], "عن": ["על", "אודות", "מ"],
+            "على": ["על"], "عند": ["אצל"], "أمام": ["לפני"], "وراء": ["מאחורי"], "خلف": ["מאחור"], "تحت": ["מתחת"],
+            "فوق": ["מעל"], "جانب": ["לצד"], "داخل": ["בתוך"], "خارج": ["מחוץ ל־", "מחוץ ל"], "قبل": ["לפני"],
+            "بعد": ["אחרי"], "خلال": ["במהלך"], "أثناء": ["בעת", "בזמן"], "اليوم": ["היום"], "غدا": ["מחר"],
+            "أمس": ["אתמול"], "دائما": ["תמיד"], "و": ["ו"], "أو": ["או"], "ثم": ["אחר כך"], "ف": ["ואז", "לכן"],
+            "لكن": ["אבל"], "بل": ["אלא"], "لأن": ["מפני שי", "מפני ש", "כי"]
+        };
+        let wordKeys = Object.keys(wordsDB);
+
+        // משתני מצב
+        let currentArabicWord = "";
+        let currentHebrewWord = "";
+        let score = 0;
+        let currentMedal = 'none'; 
+        let userName = ''; 
+        let db = null;
+        let userUid = null;
+        let isMusicPlaying = false;
+        let hintUsedForCurrentWord = false; 
+        
+        let gameMode = localStorage.getItem('arabicVocabMode') || 'typing'; 
+        let gameDirection = localStorage.getItem('arabicVocabDir') || 'ar-he'; // ar-he | he-ar
+
+        const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'arabic-app-id';
+
+        const wordDisplay = document.getElementById('word-display');
+        const questionLabel = document.getElementById('question-label');
+        const answerInput = document.getElementById('answer-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const revealBtn = document.getElementById('reveal-btn');
+        const skipBtn = document.getElementById('skip-btn');
+        const speakBtn = document.getElementById('speak-btn');
+        const feedbackMsg = document.getElementById('feedback-msg');
+        const scoreDisplay = document.getElementById('score-display');
+        const gameContainer = document.getElementById('game-container');
+        const startScreen = document.getElementById('start-screen');
+        const startBtn = document.getElementById('start-btn');
+        const bgMusic = document.getElementById('bg-music');
+        const medalSound = document.getElementById('medal-sound');
+        const musicToggle = document.getElementById('music-toggle');
+        const medalContainer = document.getElementById('medal-container');
+        const medalDisplay = document.getElementById('medal-display');
+        const miniProgressBar = document.getElementById('mini-progress-bar');
+        
+        const typingInputWrapper = document.getElementById('typing-input-wrapper');
+        const choiceGridContainer = document.getElementById('choice-grid-container');
+        const choiceGrid = document.getElementById('choice-grid');
+        
+        const modeTypingBtn = document.getElementById('mode-typing-btn');
+        const modeChoiceBtn = document.getElementById('mode-choice-btn');
+        const dirArHeBtn = document.getElementById('dir-ar-he-btn');
+        const dirHeArBtn = document.getElementById('dir-he-ar-btn');
+        const settingsToggleBtn = document.getElementById('settings-toggle-btn');
+        const currentSettingsLabel = document.getElementById('current-settings-label');
+
+        const usernameInput = document.getElementById('username-input');
+        const userInputContainer = document.getElementById('user-input-container');
+        const welcomeBackContainer = document.getElementById('welcome-back-container');
+        const welcomeName = document.getElementById('welcome-name');
+        const changeUserBtn = document.getElementById('change-user-btn');
+        
+        const openProfileBtn = document.getElementById('open-profile-btn');
+        const closeProfileBtn = document.getElementById('close-profile-btn');
+        const profileModal = document.getElementById('profile-modal');
+        const profileContent = document.getElementById('profile-content');
+        const profileNameDisplay = document.getElementById('profile-name-display');
+        const profileScoreDisplay = document.getElementById('profile-score-display');
+        const profileProgressBar = document.getElementById('profile-progress-bar');
+        
+        const medalsObj = {
+            bronze: { elem: document.getElementById('medal-box-bronze'), threshold: 100 },
+            silver: { elem: document.getElementById('medal-box-silver'), threshold: 500 },
+            gold:   { elem: document.getElementById('medal-box-gold'), threshold: 1000 },
+            amber:  { elem: document.getElementById('medal-box-amber'), threshold: 5000 },
+            diamond:{ elem: document.getElementById('medal-box-diamond'), threshold: 10000 }
+        };
+        const nextMedalHint = document.getElementById('next-medal-hint');
+
+        function getEditDistance(a, b) {
+            a = a.trim(); b = b.trim();
+            if (a.length === 0) return b.length;
+            if (b.length === 0) return a.length;
+            const matrix = [];
+            for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+            for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) == a.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1, 
+                            Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1) 
+                        );
+                    }
+                }
+            }
+            return matrix[b.length][a.length];
+        }
+
+        function speakWord() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); 
+                const utterance = new SpeechSynthesisUtterance(currentArabicWord);
+                utterance.lang = 'ar-SA'; 
+                utterance.rate = 0.85; 
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function updateStartScreenBtns() {
+            modeTypingBtn.className = gameMode === 'typing' ? "flex-1 py-2 rounded-lg text-white font-bold bg-emerald-800 shadow-md transition-all text-sm" : "flex-1 py-2 rounded-lg text-emerald-200/50 hover:text-white transition-all text-sm";
+            modeChoiceBtn.className = gameMode === 'choice' ? "flex-1 py-2 rounded-lg text-white font-bold bg-emerald-800 shadow-md transition-all text-sm" : "flex-1 py-2 rounded-lg text-emerald-200/50 hover:text-white transition-all text-sm";
+            
+            dirArHeBtn.className = gameDirection === 'ar-he' ? "flex-1 py-2 rounded-lg text-white font-bold bg-emerald-800 shadow-md transition-all text-sm" : "flex-1 py-2 rounded-lg text-emerald-200/50 hover:text-white transition-all text-sm";
+            dirHeArBtn.className = gameDirection === 'he-ar' ? "flex-1 py-2 rounded-lg text-white font-bold bg-emerald-800 shadow-md transition-all text-sm" : "flex-1 py-2 rounded-lg text-emerald-200/50 hover:text-white transition-all text-sm";
+        }
+
+        function applySettings() {
+            localStorage.setItem('arabicVocabMode', gameMode);
+            localStorage.setItem('arabicVocabDir', gameDirection);
+            
+            const dirLabel = gameDirection === 'ar-he' ? 'AR➔HE' : 'HE➔AR';
+            const modeLabel = gameMode === 'typing' ? 'הקלדה' : 'אמריקאי';
+            currentSettingsLabel.textContent = `${dirLabel} | ${modeLabel}`;
+
+            if (gameMode === 'typing') {
+                typingInputWrapper.classList.remove('hidden');
+                submitBtn.classList.remove('hidden');
+                choiceGridContainer.classList.add('hidden');
+                if(window.innerWidth > 640 && startScreen.style.display === 'none') answerInput.focus();
+            } else {
+                typingInputWrapper.classList.add('hidden');
+                submitBtn.classList.add('hidden');
+                choiceGridContainer.classList.remove('hidden');
+                generateChoiceButtons();
+            }
+        }
+
+        async function initApp() {
+            bgMusic.volume = 0.4;
+            medalSound.volume = 0.8;
+            bgMusic.load();
+
+            userName = localStorage.getItem('arabicVocabUser') || '';
+            if (userName) {
+                userInputContainer.classList.add('hidden');
+                welcomeBackContainer.classList.remove('hidden');
+                welcomeName.textContent = userName;
+            }
+
+            updateStartScreenBtns();
+
+            changeUserBtn.addEventListener('click', () => {
+                if(confirm('האם אתה בטוח? הניקוד הנוכחי יאופס.')) {
+                    localStorage.removeItem('arabicVocabUser');
+                    localStorage.removeItem('arabicVocabScore');
+                    userName = ''; score = 0; currentMedal = 'none';
+                    medalContainer.classList.add('hidden');
+                    updateScoreUI();
+                    welcomeBackContainer.classList.add('hidden');
+                    userInputContainer.classList.remove('hidden');
+                    usernameInput.value = ''; usernameInput.focus();
+                }
+            });
+
+            startBtn.addEventListener('click', () => {
+                if (!userName) {
+                    const inputVal = usernameInput.value.trim();
+                    userName = inputVal ? inputVal : "שחקן אלמוני";
+                    localStorage.setItem('arabicVocabUser', userName);
+                }
+
+                const playPromise = bgMusic.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        isMusicPlaying = true;
+                        musicToggle.textContent = '🎵';
+                    }).catch(() => {
+                        musicToggle.textContent = '🔇';
+                        musicToggle.classList.add('opacity-50');
+                    });
+                }
+
+                applySettings();
+
+                startScreen.style.opacity = '0';
+                setTimeout(() => {
+                    startScreen.style.display = 'none';
+                    gameContainer.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+                    gameContainer.classList.add('opacity-100', 'scale-100');
+                    pickNewWord();
+                }, 400);
+            });
+
+            setupEventListeners();
+            
+            if (firebaseConfigStr) await initFirebase(); 
+            else await loadScore(); 
+        }
+
+        function calculateProgress(currentScore) {
+            let nextTarget = 10000;
+            let prevTarget = 0;
+            if (currentScore < 100) { nextTarget = 100; prevTarget = 0; }
+            else if (currentScore < 500) { nextTarget = 500; prevTarget = 100; }
+            else if (currentScore < 1000) { nextTarget = 1000; prevTarget = 500; }
+            else if (currentScore < 5000) { nextTarget = 5000; prevTarget = 1000; }
+            else if (currentScore < 10000) { nextTarget = 10000; prevTarget = 5000; }
+            else return 100;
+
+            let percentage = ((currentScore - prevTarget) / (nextTarget - prevTarget)) * 100;
+            return Math.min(Math.max(percentage, 0), 100);
+        }
+
+        function openProfile() {
+            profileNameDisplay.textContent = userName;
+            profileScoreDisplay.textContent = score;
+            
+            for (const [key, obj] of Object.entries(medalsObj)) {
+                obj.elem.className = score >= obj.threshold ? "flex flex-col items-center transition-all duration-500 medal-unlocked w-16 sm:w-20" : "flex flex-col items-center transition-all duration-500 medal-locked w-16 sm:w-20";
+            }
+
+            if (score < 100) nextMedalHint.textContent = `עוד ${100 - score} נקודות לארד`;
+            else if (score < 500) nextMedalHint.textContent = `עוד ${500 - score} נקודות לכסף`;
+            else if (score < 1000) nextMedalHint.textContent = `עוד ${1000 - score} נקודות לזהב`;
+            else if (score < 5000) nextMedalHint.textContent = `עוד ${5000 - score} נקודות לענבר`;
+            else if (score < 10000) nextMedalHint.textContent = `עוד ${10000 - score} נקודות ליהלום`;
+            else nextMedalHint.textContent = "השגת את כל המדליות! 👑";
+
+            profileProgressBar.style.width = `${calculateProgress(score)}%`;
+
+            profileModal.classList.remove('hidden');
+            setTimeout(() => {
+                profileModal.classList.remove('opacity-0');
+                profileContent.classList.remove('scale-95');
+                profileContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeProfile() {
+            profileModal.classList.add('opacity-0');
+            profileContent.classList.remove('scale-100');
+            profileContent.classList.add('scale-95');
+            setTimeout(() => {
+                profileModal.classList.add('hidden');
+                if(gameMode === 'typing' && window.innerWidth > 640) answerInput.focus();
+            }, 300);
+        }
+
+        async function initFirebase() {
+            try {
+                const firebaseConfig = JSON.parse(firebaseConfigStr);
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                db = getFirestore(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) { userUid = user.uid; await loadScore(); }
+                });
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
+                else await signInAnonymously(auth);
+            } catch (error) { await loadScore(); }
+        }
+
+        async function loadScore() {
+            const localScore = localStorage.getItem('arabicVocabScore');
+            if (localScore !== null) {
+                score = parseInt(localScore, 10);
+                updateScoreUI(); checkMedals(score, false);
+            }
+            if (!db || !userUid) return;
+            try {
+                const docSnap = await getDoc(doc(db, 'artifacts', appId, 'users', userUid, 'scores', 'arabic'));
+                if (docSnap.exists()) {
+                    const cloudScore = docSnap.data().value || 0;
+                    if (cloudScore >= score) {
+                        score = cloudScore; updateScoreUI(); checkMedals(score, false);
+                    }
+                }
+            } catch (e) {}
+        }
+
+        async function saveScore() {
+            localStorage.setItem('arabicVocabScore', score);
+            if (!db || !userUid) return;
+            try { await setDoc(doc(db, 'artifacts', appId, 'users', userUid, 'scores', 'arabic'), { value: score }); } catch (e) {}
+        }
+
+        function checkMedals(currentScore, isUpgrade = true) {
+            let newMedal = 'none', emoji = '', name = '';
+            if (currentScore >= 10000) { newMedal = 'diamond'; emoji = '💎'; name = 'יהלום'; }
+            else if (currentScore >= 5000) { newMedal = 'amber'; emoji = '🔶'; name = 'ענבר'; }
+            else if (currentScore >= 1000) { newMedal = 'gold'; emoji = '🥇'; name = 'זהב'; }
+            else if (currentScore >= 500) { newMedal = 'silver'; emoji = '🥈'; name = 'כסף'; }
+            else if (currentScore >= 100) { newMedal = 'bronze'; emoji = '🥉'; name = 'ארד'; }
+
+            if (newMedal !== 'none') {
+                medalDisplay.textContent = emoji;
+                medalContainer.classList.remove('hidden');
+                
+                if (isUpgrade && newMedal !== currentMedal) {
+                    medalSound.play().catch(e => {});
+                    medalContainer.classList.remove('medal-pop');
+                    void medalContainer.offsetWidth; 
+                    medalContainer.classList.add('medal-pop');
+                    showFeedback(`זכית במדליית ${name}! ${emoji}`, "success");
+                }
+            }
+            currentMedal = newMedal;
+        }
+
+        function pickNewWord() {
+            wordDisplay.parentElement.classList.remove('pop-in');
+            void wordDisplay.parentElement.offsetWidth;
+            wordDisplay.parentElement.classList.add('pop-in');
+            hintUsedForCurrentWord = false; 
+            
+            const randomIndex = Math.floor(Math.random() * wordKeys.length);
+            currentArabicWord = wordKeys[randomIndex];
+            const hebrewOptions = wordsDB[currentArabicWord];
+            currentHebrewWord = hebrewOptions[Math.floor(Math.random() * hebrewOptions.length)];
+            
+            answerInput.value = '';
+            answerInput.classList.remove('border-rose-400', 'bg-rose-900/40');
+
+            if (gameDirection === 'ar-he') {
+                questionLabel.textContent = "תרגם לעברית";
+                wordDisplay.textContent = currentArabicWord;
+                wordDisplay.className = "arabic-font text-5xl sm:text-6xl md:text-7xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] break-words";
+                answerInput.placeholder = "הקלד תרגום עברי...";
+            } else {
+                questionLabel.textContent = "תרגם לערבית";
+                wordDisplay.textContent = currentHebrewWord;
+                wordDisplay.className = "text-4xl sm:text-5xl md:text-6xl font-black text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] break-words";
+                answerInput.placeholder = "اكتب بالعربية...";
+            }
+
+            if (gameDirection === 'ar-he') {
+                setTimeout(speakWord, 300);
+            }
+
+            if (gameMode === 'typing') {
+                if(window.innerWidth > 640 && startScreen.style.display === 'none') { answerInput.focus(); }
+            } else {
+                generateChoiceButtons();
+            }
+        }
+
+        function generateChoiceButtons() {
+            if (!currentArabicWord) return;
+            choiceGrid.innerHTML = ''; 
+            
+            let options = [];
+            
+            if (gameDirection === 'ar-he') {
+                options = [wordsDB[currentArabicWord][0]];
+                while(options.length < 10) {
+                    const rWord = wordKeys[Math.floor(Math.random() * wordKeys.length)];
+                    const wrong = wordsDB[rWord][0];
+                    if (!wordsDB[currentArabicWord].includes(wrong) && !options.includes(wrong)) options.push(wrong);
+                }
+            } else {
+                options = [currentArabicWord];
+                while(options.length < 10) {
+                    const wrong = wordKeys[Math.floor(Math.random() * wordKeys.length)];
+                    if (wrong !== currentArabicWord && !options.includes(wrong)) options.push(wrong);
+                }
+            }
+            
+            options = options.sort(() => Math.random() - 0.5);
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.textContent = opt;
+                btn.className = `bg-slate-800/80 hover:bg-slate-700 border border-emerald-900/50 text-white font-semibold py-4 px-2 rounded-xl transition-all active:scale-95 text-sm sm:text-base break-words flex items-center justify-center min-h-[60px] ${gameDirection === 'he-ar' ? 'arabic-font text-xl' : ''}`;
+                btn.onclick = () => checkChoiceAnswer(btn, opt);
+                choiceGrid.appendChild(btn);
+            });
+        }
+
+        function checkChoiceAnswer(btn, selectedOption) {
+            const allButtons = choiceGrid.querySelectorAll('button');
+            allButtons.forEach(b => b.disabled = true);
+
+            let isCorrect = false;
+            if (gameDirection === 'ar-he') {
+                isCorrect = wordsDB[currentArabicWord].includes(selectedOption);
+            } else {
+                isCorrect = (selectedOption === currentArabicWord);
+            }
+
+            if (isCorrect) {
+                btn.classList.add('bg-emerald-500/80', 'border-emerald-400');
+                if (gameDirection === 'he-ar') speakWord(); 
+                
+                if (!hintUsedForCurrentWord) {
+                    score += 10; updateScoreUI(); saveScore(); checkMedals(score, true); 
+                    showFeedback("מצוין! (ممتاز)", "success");
+                } else showFeedback("נכון! (ללא ניקוד)", "info");
+                
+                setTimeout(pickNewWord, 1000); 
+            } else {
+                btn.classList.add('bg-rose-500/80', 'border-rose-400', 'shake');
+                showFeedback("טעות, نסה שוב", "error");
+                setTimeout(() => {
+                    btn.classList.remove('bg-rose-500/80', 'border-rose-400', 'shake');
+                    allButtons.forEach(b => b.disabled = false);
+                }, 500);
+            }
+        }
+
+        function checkAnswer() {
+            const userInput = answerInput.value.trim();
+            if (!userInput) return;
+
+            let isCorrect = false;
+            let matchedAnswer = "";
+
+            if (gameDirection === 'ar-he') {
+                const correctAnswers = wordsDB[currentArabicWord];
+                for (let answer of correctAnswers) {
+                    const cleanAnswer = answer.trim();
+                    if (userInput === cleanAnswer) { isCorrect = true; matchedAnswer = cleanAnswer; break; }
+                    const dist = getEditDistance(userInput, cleanAnswer);
+                    const allowed = cleanAnswer.length <= 3 ? 0 : (cleanAnswer.length <= 5 ? 1 : 2);
+                    if (dist <= allowed) { isCorrect = true; matchedAnswer = cleanAnswer; break; }
+                }
+            } else {
+                if (userInput === currentArabicWord) { isCorrect = true; }
+                else {
+                    const dist = getEditDistance(userInput, currentArabicWord);
+                    const allowed = currentArabicWord.length <= 3 ? 0 : (currentArabicWord.length <= 6 ? 1 : 2);
+                    if (dist <= allowed) isCorrect = true;
+                }
+            }
+            
+            if (isCorrect) {
+                if (gameDirection === 'he-ar') speakWord();
+                
+                if (!hintUsedForCurrentWord) {
+                    score += 10; updateScoreUI(); saveScore(); checkMedals(score, true); 
+                    let msg = "מצוין! ✨";
+                    if (gameDirection === 'ar-he' && matchedAnswer) {
+                        const others = wordsDB[currentArabicWord].filter(a => a !== matchedAnswer);
+                        if(others.length > 0) msg += ` (גם: ${others.join(', ')})`;
+                    }
+                    if (feedbackMsg.textContent.indexOf('זכית במדליית') === -1) {
+                        showFeedback(msg, "success");
+                        gameContainer.classList.add('success-glow');
+                        setTimeout(() => gameContainer.classList.remove('success-glow'), 1000);
+                    }
+                } else showFeedback("נכון! (ללא ניקוד)", "info");
+                setTimeout(pickNewWord, 1500); 
+            } else {
+                gameContainer.classList.add('shake');
+                answerInput.classList.add('border-rose-400', 'bg-rose-900/40');
+                setTimeout(() => {
+                    gameContainer.classList.remove('shake');
+                    answerInput.classList.remove('border-rose-400', 'bg-rose-900/40');
+                }, 400);
+                showFeedback("טעות, نסה שוב", "error");
+                answerInput.value = '';
+                if(window.innerWidth > 640) answerInput.focus();
+            }
+        }
+
+        function showMeaning() {
+            hintUsedForCurrentWord = true; 
+            if (gameDirection === 'ar-he') {
+                showFeedback(`התרגום: ${wordsDB[currentArabicWord].join(', ')}`, "info");
+            } else {
+                speakWord();
+                showFeedback(`התרגום לערבית: ${currentArabicWord}`, "info");
+            }
+            
+            if (gameMode === 'choice') {
+                const buttons = choiceGrid.querySelectorAll('button');
+                buttons.forEach(btn => {
+                    if (gameDirection === 'ar-he' && wordsDB[currentArabicWord].includes(btn.textContent)) btn.classList.add('bg-emerald-500/80', 'border-emerald-400');
+                    if (gameDirection === 'he-ar' && btn.textContent === currentArabicWord) btn.classList.add('bg-emerald-500/80', 'border-emerald-400');
+                });
+            } else if (window.innerWidth > 640) answerInput.focus();
+        }
+
+        function skipWord() {
+            if (gameDirection === 'ar-he') showFeedback(`התשובה: ${wordsDB[currentArabicWord].join(' או ')}`, "info");
+            else showFeedback(`الجواب: ${currentArabicWord}`, "info");
+            setTimeout(pickNewWord, 1500);
+        }
+
+        function showFeedback(msg, type) {
+            feedbackMsg.textContent = msg;
+            feedbackMsg.style.opacity = '1';
+            feedbackMsg.style.transform = 'translateY(0)';
+            
+            if (type === 'success') feedbackMsg.className = "mt-6 sm:mt-8 text-lg sm:text-xl font-black text-emerald-400 drop-shadow-md h-12 transition-all duration-300 flex items-center justify-center break-words px-2 text-center";
+            else if (type === 'error') feedbackMsg.className = "mt-6 sm:mt-8 text-base sm:text-lg font-bold text-rose-400 h-12 transition-all duration-300 flex items-center justify-center break-words px-2 text-center";
+            else feedbackMsg.className = "mt-6 sm:mt-8 text-base sm:text-lg font-medium text-emerald-200 h-12 transition-all duration-300 flex items-center justify-center break-words px-2 text-center";
+            
+            setTimeout(() => {
+                feedbackMsg.style.opacity = '0';
+                feedbackMsg.style.transform = 'translateY(10px)';
+            }, 3000);
+        }
+
+        function updateScoreUI() {
+            scoreDisplay.style.transform = "scale(1.3)";
+            scoreDisplay.textContent = score;
+            miniProgressBar.style.width = `${calculateProgress(score)}%`;
+            
+            setTimeout(() => {
+                scoreDisplay.style.transform = "scale(1)";
+                scoreDisplay.style.transition = "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+            }, 200);
+        }
+
+        function setupEventListeners() {
+            modeTypingBtn.addEventListener('click', () => { gameMode = 'typing'; updateStartScreenBtns(); });
+            modeChoiceBtn.addEventListener('click', () => { gameMode = 'choice'; updateStartScreenBtns(); });
+            dirArHeBtn.addEventListener('click', () => { gameDirection = 'ar-he'; updateStartScreenBtns(); });
+            dirHeArBtn.addEventListener('click', () => { gameDirection = 'he-ar'; updateStartScreenBtns(); });
+            
+            settingsToggleBtn.addEventListener('click', () => {
+                if (gameDirection === 'ar-he' && gameMode === 'typing') { gameMode = 'choice'; }
+                else if (gameDirection === 'ar-he' && gameMode === 'choice') { gameDirection = 'he-ar'; gameMode = 'typing'; }
+                else if (gameDirection === 'he-ar' && gameMode === 'typing') { gameMode = 'choice'; }
+                else { gameDirection = 'ar-he'; gameMode = 'typing'; }
+                applySettings(); pickNewWord();
+            });
+
+            submitBtn.addEventListener('click', checkAnswer);
+            skipBtn.addEventListener('click', skipWord);
+            revealBtn.addEventListener('click', showMeaning); 
+            speakBtn.addEventListener('click', speakWord); 
+            
+            openProfileBtn.addEventListener('click', openProfile);
+            closeProfileBtn.addEventListener('click', closeProfile);
+            profileModal.addEventListener('click', (e) => { if (e.target === profileModal) closeProfile(); });
+            
+            answerInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') { answerInput.blur(); checkAnswer(); }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initApp();
+        });
+    </script>
+</body>
+</html>
