@@ -452,6 +452,37 @@
         };
         const nextMedalHint = document.getElementById('next-medal-hint');
 
+        // ----- טיפול משופר בקולות ובהקראה -----
+        let preferredArabicVoice = null;
+        
+        function loadVoices() {
+            const voices = window.speechSynthesis.getVoices();
+            // חיפוש קול שמתחיל ב-ar כדי לוודא שיש שמע ערבי
+            preferredArabicVoice = voices.find(v => v.lang.startsWith('ar')) || null;
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+            loadVoices(); // ניסיון טעינה ראשוני
+        }
+
+        function speakWord() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); 
+                const utterance = new SpeechSynthesisUtterance(currentArabicWord);
+                
+                // שימוש בקול הערבי אם נמצא במכשיר
+                if (preferredArabicVoice) {
+                    utterance.voice = preferredArabicVoice;
+                }
+                
+                utterance.lang = 'ar-SA'; // גיבוי לערבית סעודית
+                utterance.rate = 0.85; 
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+        // --------------------------------------
+
         function getEditDistance(a, b) {
             a = a.trim(); b = b.trim();
             if (a.length === 0) return b.length;
@@ -472,16 +503,6 @@
                 }
             }
             return matrix[b.length][a.length];
-        }
-
-        function speakWord() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); 
-                const utterance = new SpeechSynthesisUtterance(currentArabicWord);
-                utterance.lang = 'ar-SA'; 
-                utterance.rate = 0.85; 
-                window.speechSynthesis.speak(utterance);
-            }
         }
 
         function updateStartScreenBtns() {
@@ -541,6 +562,13 @@
             });
 
             startBtn.addEventListener('click', () => {
+                // הבטחת טעינת הקולות ברגע שלחיצה (User Gesture חשוב לניידים)
+                if('speechSynthesis' in window) {
+                    let dummyUtterance = new SpeechSynthesisUtterance('');
+                    dummyUtterance.volume = 0;
+                    window.speechSynthesis.speak(dummyUtterance);
+                }
+
                 if (!userName) {
                     const inputVal = usernameInput.value.trim();
                     userName = inputVal ? inputVal : "שחקן אלמוני";
