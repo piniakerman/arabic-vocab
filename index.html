@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#064e3b">
+    <!-- שורת הקסם שמסתירה את הכתובת מגוגל ומאפשרת לסאונד לעבוד מגיטהאב -->
+    <meta name="referrer" content="no-referrer">
     <title>אתגר הערבית - Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
@@ -110,12 +112,15 @@
         <div class="circle"></div><div class="circle"></div><div class="circle"></div>
     </div>
 
+    <!-- הגדרת אלמנטים של אודיו -->
     <audio id="bg-music" loop crossorigin="anonymous" preload="auto">
         <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
     </audio>
     <audio id="medal-sound" crossorigin="anonymous" preload="auto">
         <source src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3" type="audio/mpeg">
     </audio>
+    <!-- אלמנט ייעודי להקראה מענן גוגל כדי למנוע חסימות דפדפן -->
+    <audio id="tts-audio" preload="auto"></audio>
 
     <!-- מסך פתיחה -->
     <div id="start-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-md text-center p-6 transition-opacity duration-500">
@@ -245,7 +250,7 @@
                    class="w-full bg-slate-900/60 border-2 border-emerald-900/50 focus:border-emerald-400 text-white rounded-2xl block p-4 sm:p-5 text-center transition-all outline-none shadow-inner font-bold">
         </div>
 
-        <!-- אזור בחירה (אמריקאי) - שונה ל-4 כפתורים גדולים -->
+        <!-- אזור בחירה (אמריקאי) - 4 כפתורים גדולים -->
         <div id="choice-grid-container" class="hidden w-full mb-8 max-w-xl mx-auto">
             <div id="choice-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             </div>
@@ -274,9 +279,8 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // מאגר מילים מקיף מנוקד בערבית (تَشْكِيل) 
+        // מאגר מילים מקיף מנוקד בערבית (تَشْكِيل)
         const wordsDB = {
-            // שמות עצם
             "دُسْتُور": ["חוקה"], "أَزْمَة": ["משבר"], "مَحْكَمَة": ["בית משפט"], "دَلِيل": ["ראיה", "הוכחה"],
             "أَمْن": ["ביטחון"], "اسْتِقَالَة": ["התפטרות"], "حُكُومَة": ["ממשלה"], "مُوَاطِن": ["אזרח"],
             "حَادِث": ["אירוע", "תאונה"], "قُوَّة": ["כוח", "כוחות"], "قِيَادَة": ["הנהגה"], "مِيثَاق": ["אמנה", "ברית"],
@@ -416,6 +420,7 @@
         const medalContainer = document.getElementById('medal-container');
         const medalDisplay = document.getElementById('medal-display');
         const miniProgressBar = document.getElementById('mini-progress-bar');
+        const ttsAudio = document.getElementById('tts-audio');
         
         const typingInputWrapper = document.getElementById('typing-input-wrapper');
         const choiceGridContainer = document.getElementById('choice-grid-container');
@@ -451,13 +456,12 @@
         };
         const nextMedalHint = document.getElementById('next-medal-hint');
 
-        // פונקציית עזר להסרת ניקוד כדי להקל על המשתמש בהקלדה
+        // פונקציית עזר להסרת ניקוד
         function removeArabicDiacritics(str) {
-            // מסיר את כל סימני הניקוד בערבית (فتحة، كسرة، ضمة، شدة וכו')
             return str.replace(/[\u0617-\u061A\u064B-\u0652]/g, "");
         }
 
-        // ----- שמע מבוסס ענן (Cloud TTS) -----
+        // ----- שמע מבוסס ענן (Cloud TTS) משופר -----
         let preferredArabicVoice = null;
         if ('speechSynthesis' in window) {
             window.speechSynthesis.onvoiceschanged = () => {
@@ -469,11 +473,9 @@
         function speakWord() {
             if (!currentArabicWord) return;
             
-            // בגוגל תרגום עדיף לשלוח את המילה המנוקדת או נקייה, שניהם עובדים היטב
-            const cloudUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(currentArabicWord)}&tl=ar&client=tw-ob`;
-            const audioObj = new Audio(cloudUrl);
-            
-            audioObj.play().catch(e => {
+            // שימוש באלמנט האודיו שקיים כבר בעמוד
+            ttsAudio.src = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(currentArabicWord)}&tl=ar&client=tw-ob`;
+            ttsAudio.play().catch(e => {
                 console.log("שגיאה בהשמעת ענן, עובר למנוע מקומי...", e);
                 
                 if ('speechSynthesis' in window) {
@@ -567,6 +569,10 @@
             });
 
             startBtn.addEventListener('click', () => {
+                // "חימום" האודיו - טריק שפותר בעיות באייפון
+                ttsAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+                ttsAudio.play().catch(e => console.log(e));
+
                 if ('speechSynthesis' in window) {
                     let dummyUtterance = new SpeechSynthesisUtterance('');
                     dummyUtterance.volume = 0;
@@ -763,7 +769,7 @@
             
             if (gameDirection === 'ar-he') {
                 options = [wordsDB[currentArabicWord][0]];
-                // 4 כפתורים במקום 10
+                // 4 כפתורים 
                 while(options.length < 4) {
                     const rWord = wordKeys[Math.floor(Math.random() * wordKeys.length)];
                     const wrong = wordsDB[rWord][0];
@@ -771,7 +777,7 @@
                 }
             } else {
                 options = [currentArabicWord];
-                // 4 כפתורים במקום 10
+                // 4 כפתורים 
                 while(options.length < 4) {
                     const wrong = wordKeys[Math.floor(Math.random() * wordKeys.length)];
                     if (wrong !== currentArabicWord && !options.includes(wrong)) options.push(wrong);
@@ -783,7 +789,6 @@
             options.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.textContent = opt;
-                // עיצוב כפתורים מוגדל שמתאים ל-4 אפשרויות
                 btn.className = `bg-slate-800/80 hover:bg-slate-700 border border-emerald-900/50 text-white font-semibold py-5 px-3 rounded-2xl transition-all active:scale-95 text-lg sm:text-xl break-words flex items-center justify-center min-h-[70px] shadow-md ${gameDirection === 'he-ar' ? 'arabic-font text-2xl' : ''}`;
                 btn.onclick = () => checkChoiceAnswer(btn, opt);
                 choiceGrid.appendChild(btn);
@@ -838,7 +843,7 @@
                     if (dist <= allowed) { isCorrect = true; matchedAnswer = cleanAnswer; break; }
                 }
             } else {
-                // המשתמש מקליד בערבית - אנו מנקים את הניקוד מהקלט ומהתשובה כדי להשוות!
+                // המשתמש מקליד בערבית - אנו מנקים את הניקוד מהקלט ומהתשובה
                 const cleanInput = removeArabicDiacritics(userInput);
                 const cleanCorrectAnswer = removeArabicDiacritics(currentArabicWord);
 
@@ -887,6 +892,7 @@
                 showFeedback(`התרגום: ${wordsDB[currentArabicWord].join(', ')}`, "info");
             } else {
                 speakWord();
+                // מנקה ניקוד כדי שיהיה נוח להעתקה/הבנה אם המשתמש נתקע, למרות שמוצג מנוקד
                 showFeedback(`התרגום לערבית: ${currentArabicWord}`, "info");
             }
             
@@ -900,7 +906,7 @@
         }
 
         function skipWord() {
-            if (gameDirection === 'ar-he') showFeedback(`התשובה: ${wordsDB[currentArabicWord].join(' או ')}`, "info");
+            if (gameDirection === 'ar-he') showFeedback(`התשובה: ${wordsDB[currentArabicWord].join(' او ')}`, "info");
             else showFeedback(`الجواب: ${currentArabicWord}`, "info");
             setTimeout(pickNewWord, 1500);
         }
